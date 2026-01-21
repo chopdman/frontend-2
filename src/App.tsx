@@ -1,37 +1,22 @@
-import { createContext, useEffect, useState } from 'react';
-import Navbar from './components/Navbar';
-import Button from './components/Button';
-import ProductCard from './components/ProductCard';
+import { createContext } from 'react';
+
+import { Route, Routes } from 'react-router';
+import Product from './components/Product';
+import Home from './components/Home';
+// import Demo from './components/Demo';
 
 export const ThemeContext = createContext(null);
 
 export default function MyApp() {
-  // localStorage.getItem()
-  const stored = localStorage.getItem("theme");
-  const [theme, setTheme] = useState(stored);
-
-  useEffect(()=>{
-// console.log(stored);
-    if(stored===null){
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
-        .matches;
-
-        
-  
-      setTheme(parseInt(prefersDark) ? "dark" : "light");
-      localStorage.setItem("theme",!parseInt(prefersDark) ? "dark" : "light")
-    }else{
-      setTheme(stored);
-    }
-
-  },[]);
-
+ 
   return (
-    <ThemeContext value={theme}>
-      <Navbar />
-      <Button setTheme={setTheme} theme={theme} />
-      <ProductCard/>
-    </ThemeContext>
+  
+    <Routes>
+<Route path="/" element={<Home />}>
+<Route index element={<Product/>}/>
+<Route path="/:products" element={<Product />} />
+</Route>
+</Routes>
   )
 }
 
