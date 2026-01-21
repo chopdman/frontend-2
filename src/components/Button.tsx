@@ -5,10 +5,11 @@ export default function Button({theme,setTheme}) {
       <button
       className="border p-2 rounded bg-black text-white"
         onClick={() => {
+            localStorage.setItem("theme",theme === "light" ? "dark" : "light");
           setTheme(theme === "light" ? "dark" : "light");
         }}
       >
-        Toggle
+        Change Theme
         </button>
       
     </div>
