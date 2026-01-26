@@ -1,9 +1,21 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { ThemeContext } from "../App";
 import { useCartContext } from "../context/Cart.js";
+import { useAuth } from "../context/AuthContext.js";
+import Login from "./Login.tsx";
 
 export default function ProductCard({ product }) {
 const { AddToCart } = useCartContext();
+const[showLogin ,setShowLogin] =useState(false);
+const {isAuthenticated} =useAuth();
+
+const handleAdd = () =>{
+  if(!isAuthenticated){
+    setShowLogin(true);
+    return;
+  }
+  AddToCart(product);
+}
  
   const theme = useContext(ThemeContext);
   return (
@@ -26,12 +38,13 @@ const { AddToCart } = useCartContext();
           Quantity: {product?.stock}
         </span>
         <button
-          onClick={() => AddToCart(product)}
+          onClick={handleAdd}
           className="border bg-green-400 rounded w-40"
         >
           Add Cart +
         </button>
       </div>
+      {showLogin && <Login onClose={()=>setShowLogin(false)}/>}
     </div>
   );
 }

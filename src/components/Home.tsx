@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Button from "./Button";
 import { CartProvider } from "../context/Cart.tsx";
 import CartButton from "./CartButton.tsx";
+import { AuthProvider } from "../context/AuthContext.tsx";
 
 export default function Home() {
   const stored = localStorage.getItem("theme");
@@ -22,12 +23,16 @@ export default function Home() {
     }
   }, []);
   return (
+    
     <ThemeContext value={theme}>
         <CartProvider>
+      <AuthProvider>
+          
           <Navbar />
           <CartButton/>
           <Button setTheme={setTheme} theme={theme} />
           <Outlet />
+    </AuthProvider>
         </CartProvider>
     </ThemeContext>
   );
