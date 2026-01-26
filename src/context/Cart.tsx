@@ -1,44 +1,73 @@
-import { createContext, useContext, useReducer, useEffect } from "react";
-import CartReducer from "../reducer/cartReducer.js";
-const CartContext = createContext();
+import { createContext, useContext, useEffect, useState, useMemo } from "react";
 
-const getLocalCartData = () => {
-  let localCartData = localStorage.getItem("cartItems");
-  if (localCartData?.length === 0) {
-    return [];
-  } else {
-    return JSON.parse(localCartData!);
-  }
-};
-const initialstate = {
-  cart: getLocalCartData(),
-  totalItems: 0,
-};
+const CartContext = createContext(undefined);
+
 const CartProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(CartReducer, initialstate);
-  const AddToCart = (id: any, title: any, price: any, ItemQuantity: any) => {
-    dispatch({
-      type: "addedtoCart",
-      payload: {
-        id,
-        title,
-        price,
-        quantity: ItemQuantity,
-      },
-    });
-  };
-  const DeleteItem = (id: any) => {
-    dispatch({
-      type: "deleteItem",
-      payload: id,
-    });
-  };
+  const [items, setItems] = useState([]);
+
   useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(state.cart));
-  }, [state.cart]);
+    const saved = localStorage.getItem("cartItems");
+
+    if (saved) setItems(JSON.parse(saved));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("cartItem", JSON.stringify(items));
+  }, [items]);
+
+  const AddToCart = (product) => {
+    console.log(product);
+    setItems((prev) => {
+      // console.log(prev);
+      if (prev === null) return [{ ...product, quantity: 1 }];
+      const existing = prev?.find((p) => p.id === product.id);
+      if (existing) {
+        return prev.map((p) =>
+          p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p,
+        );
+      }
+      return [...prev, { ...product, quantity: 1 }];
+    });
+  };
+
+  const increment = (id) => {
+    setItems((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, quantity: p.quantity + 1 } : p)),
+    );
+  };
+
+  const decrement = (id) => {
+    setItems((prev) =>
+      prev
+        .map((p) => (p.id === id ? { ...p, quantity: p.quantity - 1 } : p))
+        .filter((p) => p.quantity > 0),
+    );
+  };
+  const removeItem = (id: any) => {
+    setItems((prev) => prev.filter((p) => p.id !== id));
+  };
+  const totalItems = useMemo(
+    () => items?.reduce((sum, item) => sum + item.quantity, 0),
+    [items],
+  );
+
+  const totalPrice = useMemo(
+    () => items?.reduce((sum, item) => sum + item.quantity * item.price, 0),
+    [items],
+  );
 
   return (
-    <CartContext.Provider value={{ ...state, AddToCart, DeleteItem }}>
+    <CartContext.Provider
+      value={{
+        items,
+        totalItems,
+        totalPrice,
+        AddToCart,
+        increment,
+        decrement,
+        removeItem,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

@@ -1,42 +1,86 @@
-import { useContext, useState } from "react";
-import useFetch from "../hooks/useFetch.js";
+import {  useEffect, useState } from "react";
 import Dropdown from "./Dropdown.js";
 import ProductCard from "./ProductCard.tsx";
 import Loader from "./Loader.tsx";
-import Search from "./Search.tsx"
-import { UrlContext } from "../context/Url.tsx";
+import { useDebounce } from "../hooks/useDebounce.js";
+import {
+  fetchCategories,
+  fetchProducts,
+  searchProducts,
+} from "../api/productsApi.ts";
+import Search from "./Search.tsx";
 
 export default function Product() {
-  // let url = "https://dummyjson.com/products";
-  const {url} = useContext(UrlContext);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [products, setProducts] = useState([]);
+  const [search, setSearch] = useState("");
 
-  const [category, setCategory] = useState("");
-  const path = location.pathname;
+  const debouncedSearch = useDebounce(search);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // if (path !== "/") {
-  //   url = `https://dummyjson.com/products/category${category !== "" ? category : path}`;
-  // }
-  // console.log(url);
-  const { data, error, loading } = useFetch(url);
-  if (loading) {
-    return <Loader />;
-  }
+  useEffect(() => {
+    fetchCategories()
+      .then((data) => {
+        const tempData = data.map((cat) => {
+          return cat.name;
+        });
+        setCategories(["all", ...tempData]);
+      })
+      .catch(() => setError("Failed to load categories"));
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      setError("");
+
+      let data = [];
+
+      if (debouncedSearch) {
+        data = await searchProducts(debouncedSearch);
+      } else {
+        data = await fetchProducts(selectedCategory);
+      }
+      setProducts(data.products);
+      setLoading(false);
+    };
+
+    load();
+  }, [selectedCategory, debouncedSearch]);
+
+  const handleCategoryChange = (str) => {
+    setSelectedCategory(str);
+    setSearch("");
+  };
+
   return (
-    <div className="w-screen h-full min-h-screen bg-blue-100 flex flex-col gap-3 ">
-      <div className="flex gap-2 z-40 self-end pr-10 pt-20">
-        <Search/>
-        <Dropdown setCategory={setCategory} />
+    <div className="w-full  mt-10 flex gap-5 flex-col p-10  ">
+      <div className="flex justify-between items-center">
+        <Dropdown
+          value={selectedCategory}
+          handleChange={handleCategoryChange}
+          categories={categories}
+        />
+
+        <Search value={search} handleSearch={setSearch} />
       </div>
-      <div className="flex flex-wrap p-5  gap-5 items-center justify-center ">
-        {error === null ? (
-          data?.products?.map((p) => {
-            return <ProductCard data={p} key={p.id} />;
-          })
-        ) : (
-          <p className="text-red-500">
-            Failed to load the data please try again.
-          </p>
-        )}
+
+      {/* States */}
+      {loading && <Loader />}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {!loading && !error && products.length === 0 && <p>No products found</p>}
+
+      {/* Products */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:md:grid-cols-3 gap-6">
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onAddToCart={() => {}}
+          />
+        ))}
       </div>
     </div>
   );

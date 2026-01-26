@@ -4,7 +4,6 @@ import { Route, Routes } from 'react-router';
 import Product from './components/Product';
 import Home from './components/Home';
 import CartList from './components/CartList';
-// import Demo from './components/Demo';
 
 export const ThemeContext = createContext(null);
 
