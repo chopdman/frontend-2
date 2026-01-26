@@ -16,7 +16,7 @@ export default function Product() {
   // if (path !== "/") {
   //   url = `https://dummyjson.com/products/category${category !== "" ? category : path}`;
   // }
-  console.log(url);
+  // console.log(url);
   const { data, error, loading } = useFetch(url);
   if (loading) {
     return <Loader />;

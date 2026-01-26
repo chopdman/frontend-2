@@ -1,20 +1,13 @@
-import { useContext, useReducer } from "react";
+import { useContext, useReducer, useState } from "react";
 import { ThemeContext } from "../App";
-import { cartReducer, initialState } from "../reducer/cartReducer.js";
+// import { cartReducer, initialState } from "../reducer/cartReducer.js";
+import { useCartContext } from "../context/Cart.js";
 
 export default function ProductCard({ data }) {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
-
-  function AddToCart() {
-    console.log(state);
-    dispatch({ type: "ADD_CART", payload: {
-      id:data.id,
-      title:data.title,
-      stock:data.stock,
-      price:data.price,
-      category:data.category
-    } });
-  }
+  // const [state, dispatch] = useReducer(cartReducer, initialState);
+const { AddToCart } = useCartContext();
+   const [ItemQuantity, SetItemQuantity] = useState(1);
+ 
   const theme = useContext(ThemeContext);
   return (
     <div className=" border rounded overflow-hidden shadow-lg bg-blue-500 z-20 min-h-56  w-1/4">
@@ -36,7 +29,7 @@ export default function ProductCard({ data }) {
           Quantity: {data.stock}
         </span>
         <button
-          onClick={AddToCart}
+          onClick={() => AddToCart(data.id, data.title, data.price, ItemQuantity)}
           className="border bg-green-400 rounded w-40"
         >
           Add Cart +
