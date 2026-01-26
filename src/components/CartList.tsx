@@ -1,5 +1,8 @@
+import { useNavigate } from "react-router";
 import { useCartContext } from "../context/Cart";
 function CartList() {
+    const navigate =useNavigate();
+
   const { items, increment, decrement, removeItem, totalItems, totalPrice } =
     useCartContext();
   if (items.length === 0) return <p className="mt-20 text-center font-bold">Cart is empty.</p>;
@@ -55,6 +58,7 @@ function CartList() {
             <th></th>
           </tr>
         </table>
+        <button className="bg-blue-400 text-white p-4 rounded cursor-pointer" onClick={()=>navigate('/checkout')}> checkout</button>
       </div>
     </>
   );
